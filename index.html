@@ -225,8 +225,6 @@ input[type=range]{width:100%;accent-color:var(--amb)}
     <div style="margin-top:10px"><button class="btn sm" id="g1go">ابدأ اللعبة</button></div>
   </div>
 
-  <h2><span class="no">5</span>اختبر نفسك</h2>
-  <div class="card" id="quiz1"></div>
   <div class="nav2"><button class="btn ghost" data-go="home">→ الرئيسية</button><button class="btn" data-go="l2">الدرس الثاني ←</button></div>
 </section>
 
@@ -280,8 +278,6 @@ input[type=range]{width:100%;accent-color:var(--amb)}
     <button class="btn sm" id="g2go">ابدأ اللعبة</button>
   </div>
 
-  <h2><span class="no">5</span>اختبر نفسك</h2>
-  <div class="card" id="quiz2"></div>
   <div class="nav2"><button class="btn ghost" data-go="l1">→ الدرس الأول</button><button class="btn" data-go="l3">الدرس الثالث ←</button></div>
 </section>
 
@@ -327,8 +323,6 @@ input[type=range]{width:100%;accent-color:var(--amb)}
   <div class="chips" id="achChips"></div>
   <div class="card info" id="achInfo"><p style="color:var(--mut)">اضغط على إنجاز لتعرف علاقته بالنيل.</p></div>
 
-  <h2><span class="no">5</span>اختبر نفسك</h2>
-  <div class="card" id="quiz3"></div>
   <div class="nav2"><button class="btn ghost" data-go="l2">→ الدرس الثاني</button><button class="btn" data-go="exam">اختبار الوحدة ←</button></div>
 </section>
 
@@ -385,18 +379,19 @@ function go(id){
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go)});
 function progress(){
-  const n=['q1','q2','q3'].filter(k=>DONE[k]).length;
+  const n=['l1','l2','l3'].filter(k=>DONE['v_'+k]).length;
   $('#pb').style.width=(n/3*100)+'%';
-  [['l1','q1'],['l2','q2'],['l3','q3']].forEach(([l,k])=>{const b=$(`#tabs [data-go=${l}]`);if(!b.querySelector('.ck')&&DONE[k]){const s=document.createElement('span');s.className='ck';s.textContent='✓';b.appendChild(s)}});
+  ['l1','l2','l3'].forEach(l=>{const b=$(`#tabs [data-go=${l}]`);if(!b.querySelector('.ck')&&DONE['v_'+l]){const s=document.createElement('span');s.className='ck';s.textContent='✓';b.appendChild(s)}});
 }
 
 /* ===== quiz engine ===== */
-function quiz(host,qs,key,label){
+function quiz(host,qs,key,cb){
   let i=0,sc=0,qd=shuffle(qs).map(q=>({...q}));
   function show(){
     if(i>=qd.length){
       const pct=sc/qd.length,st=pct>=.85?'⭐⭐⭐':pct>=.6?'⭐⭐':'⭐';
-      host.innerHTML=`<div class="result"><div class="st">${st}</div><h2 style="justify-content:center;margin:6px 0">نتيجتك ${sc} من ${qd.length}</h2><p>${pct>=.85?'ممتاز! أنت رحّال محترف 🧭':pct>=.6?'جيد جدًا، راجع النقاط التي أخطأت فيها.':'حاول مرة أخرى بعد مراجعة الدرس.'}</p><button class="btn" id="again">أعد المحاولة</button></div>`;
+      host.innerHTML=`<div class="result"><div class="st">${st}</div><h2 style="justify-content:center;margin:6px 0">نتيجتك ${sc} من ${qd.length}</h2><p>${cb?'لا تقلق، هذا اختبار قبلي لمعرفة ما تعرفه قبل الشرح. ستجد الإجابات في الدرس.':pct>=.85?'ممتاز! أنت رحّال محترف 🧭':pct>=.6?'جيد جدًا، راجع النقاط التي أخطأت فيها.':'حاول مرة أخرى بعد مراجعة الدرس.'}</p>${cb?'<button class="btn" id="startL">ابدأ الشرح ←</button> ':''}<button class="btn ${cb?'ghost':''}" id="again">أعد المحاولة</button></div>`;
+      if(cb)$('#startL',host).onclick=cb;
       if(key){DONE[key]=Math.max(DONE[key]||0,sc);save();progress()}
       $('#again',host).onclick=()=>{i=0;sc=0;qd=shuffle(qs).map(q=>({...q}));show()};return;
     }
@@ -521,7 +516,7 @@ const EXP=[
   if(cur.ck(p)){sc++;$('#g1msg').innerHTML='<span class="good">✔ أحسنت!</span>';next()}else{$('#g1msg').innerHTML='<span class="bad">✘ حاول مرة أخرى.</span>';s.classList.remove('shake');void s.getBoundingClientRect();s.classList.add('shake')}
   $('#g1s').textContent=sc;$('#g1a').textContent=at});
 })();
-quiz($('#quiz1'),Q1,'q1');
+
 
 /* ===== LESSON 2 ===== */
 const ST={
@@ -590,7 +585,7 @@ let m2svg;
    $('#g2s').textContent=sc;opts.querySelectorAll('button').forEach(x=>x.disabled=true);setTimeout(nx,1100)};opts.appendChild(b)})}
  $('#g2go').onclick=()=>{q=shuffle(R);r=0;sc=0;$('#g2s').textContent=0;$('#g2m').textContent='';$('#g2go').textContent='إعادة';nx()};
 })();
-quiz($('#quiz2'),Q2,'q2');
+
 
 /* ===== LESSON 3 ===== */
 const NSTA=[
@@ -663,7 +658,39 @@ const NSTA=[
   ['⛵ الملاحة والتجارة','جريان النيل نحو الشمال وهبوب الرياح نحو الجنوب سهّلا الإبحار في الاتجاهين، فنشطت التجارة والنقل.']];
  const c=$('#achChips');A.forEach(([t,h])=>{const b=document.createElement('button');b.className='chip';b.textContent=t;b.onclick=()=>{$$('#achChips .chip').forEach(x=>x.classList.toggle('on',x===b));$('#achInfo').innerHTML=`<h3>${t}</h3><p>${h}</p>`};c.appendChild(b)});
 })();
-quiz($('#quiz3'),Q3,'q3');
+
+
+
+/* ===== pre-tests (قبل الشرح) ===== */
+const PRE={
+ l1:[{q:'ما القارة الأكبر مساحة في العالم؟',o:['آسيا','إفريقيا','أوروبا','أستراليا'],a:0,e:'آسيا الأكبر، وإفريقيا ثاني أكبر القارات.'},
+     {q:'أي البحار التالية يحد قارة إفريقيا من الشمال؟',o:['البحر المتوسط','البحر الأسود','بحر العرب','بحر قزوين'],a:0,e:'البحر المتوسط يحد إفريقيا شمالًا.'},
+     {q:'خط الاستواء هو دائرة عرض قيمتها:',o:['صفر°','23.5° شمالًا','66.5° شمالًا','90°'],a:0,e:'خط الاستواء هو الصفر لدوائر العرض.'},
+     {q:'من الرحّالة الذي وصل إلى الهند بحرًا حول إفريقيا؟',o:['فاسكو دا جاما','ماركو بولو','ابن بطوطة','كولومبوس'],a:0,e:'فاسكو دا جاما عام 1498م.'}],
+ l2:[{q:'المضيق هو:',o:['ممر مائي طبيعي ضيق يصل بين بحرين','قناة حفرها الإنسان','جزيرة في البحر','نهر كبير'],a:0,e:'المضيق ممر طبيعي، أما القناة فصناعية.'},
+     {q:'أي دولة تقع عليها قناة السويس؟',o:['مصر','السودان','ليبيا','الأردن'],a:0,e:'قناة السويس في مصر.'},
+     {q:'ماذا نسمي طريق السفن حول جنوب إفريقيا؟',o:['طريق رأس الرجاء الصالح','طريق الحرير','طريق الهند البري','قناة بنما'],a:0,e:'كانت السفن تدور حول رأس الرجاء الصالح قبل افتتاح القناة.'}],
+ l3:[{q:'يجري نهر النيل في اتجاه:',o:['الشمال','الجنوب','الشرق','الغرب'],a:0,e:'يجري النيل من الجنوب إلى الشمال.'},
+     {q:'ماذا يترك الفيضان على الأرض؟',o:['الطمي','الملح','الحصى','الجليد'],a:0,e:'الطمي يخصّب التربة.'},
+     {q:'أين يصب نهر النيل؟',o:['البحر المتوسط','البحر الأحمر','المحيط الهندي','المحيط الأطلسي'],a:0,e:'يصب في البحر المتوسط.'}]};
+['l1','l2','l3'].forEach(id=>{
+ const v=$('#v-'+id),goals=$('.goals',v),nav=$('.nav2',v);
+ const body=document.createElement('div');body.className='lbody';body.style.display='none';
+ let n=goals.nextElementSibling;while(n&&n!==nav){const nx=n.nextElementSibling;body.appendChild(n);n=nx}
+ nav.before(body);
+ const pre=document.createElement('div');pre.className='card';pre.style.display='none';
+ pre.innerHTML='<h2 style="margin-top:0"><span class="no">؟</span>أسئلة قبل الدرس</h2><p style="color:var(--mut)">أسئلة قصيرة لتعرف ماذا تعرف قبل الشرح. الإجابات تظهر مع كل سؤال.</p><div class="pq"></div>';
+ const choice=document.createElement('div');choice.className='card';
+ choice.innerHTML='<h2 style="margin-top:0">اختر طريقك</h2><div class="row"><button class="tile" data-m="pre"><span class="ic">📝</span><b>ابدأ بالأسئلة</b><span>اختبر معلوماتك أولًا ثم ادخل الشرح وقتما تحب</span></button><button class="tile" data-m="body"><span class="ic">📖</span><b>ادخل الشرح مباشرة</b><span>ابدأ بالخرائط والأنشطة، وتقدر ترجع للأسئلة بعدها</span></button></div>';
+ const sw=document.createElement('div');sw.className='chips';sw.style.display='none';
+ sw.innerHTML='<button class="chip" data-m="pre">📝 الأسئلة</button><button class="chip" data-m="body">📖 الشرح</button>';
+ goals.after(choice);choice.after(sw);sw.after(pre);
+ const show=m=>{choice.style.display='none';sw.style.display='flex';pre.style.display=m==='pre'?'block':'none';body.style.display=m==='body'?'block':'none';
+  $$('.chip',sw).forEach(c=>c.classList.toggle('on',c.dataset.m===m));DONE['v_'+id]=1;save();progress();window.scrollTo({top:sw.offsetTop-90,behavior:'smooth'})};
+ $$('[data-m]',choice).forEach(b=>b.onclick=()=>show(b.dataset.m));
+ $$('[data-m]',sw).forEach(b=>b.onclick=()=>show(b.dataset.m));
+ quiz($('.pq',pre),PRE[id],null,()=>show('body'));
+});
 
 /* ===== exam ===== */
 quiz($('#quizX'),Q_X,null);
