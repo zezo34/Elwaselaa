@@ -111,6 +111,8 @@ svg.mp{width:100%;height:auto;display:block;border-radius:20px;background:var(--
 .opts button{text-align:start;background:var(--card2);border:1.5px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:600;transition:.15s}
 .opts button:hover:not(:disabled){border-color:var(--cy)}
 .opts button.ok{background:#1c5a3b;border-color:var(--gr)}
+.opts button.sel{background:#17324a;border-color:var(--cy)}
+.opts button.sel{background:#17324a;border-color:var(--cy)}
 .opts button.no{background:#5a2323;border-color:var(--co)}
 .opts button:disabled{cursor:default}
 .shake{animation:sh .35s}
@@ -310,7 +312,7 @@ input[type=range]{width:100%;accent-color:var(--amb)}
     <div class="info" id="monInfo"></div>
   </div>
 
-  <h2><span class="no">3</span>النيل أب الحضارة: رتّب الخطوات</h2>
+  <h2><span class="no">3</span>النيل أبو الحضارة: رتّب الخطوات</h2>
   <div class="card game">
     <p>اضغط على الخطوات بالترتيب الصحيح لنشأة الحضارة على النيل.</p>
     <div class="slots" id="slots"></div>
@@ -398,14 +400,15 @@ function quiz(host,qs,key,cb){
     const q=qd[i];const order=shuffle(q.o.map((t,k)=>[t,k]));
     host.innerHTML=`<div class="score"><span class="pill">السؤال ${i+1} / ${qd.length}</span><span class="pill">النقاط ${sc}</span></div><div class="bar" style="margin:8px 0"><i style="width:${i/qd.length*100}%"></i></div><div class="q" style="font-size:20px;font-weight:800">${q.q}</div><div class="opts"></div><div class="toast"></div><div id="nx"></div>`;
     const ob=$('.opts',host);
+    let picked=null;
     order.forEach(([t,k])=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>{
-      $$('button',ob).forEach(x=>x.disabled=true);
-      const ok=k===q.a;if(ok)sc++;
-      b.classList.add(ok?'ok':'no');
-      if(!ok)$$('button',ob).find(x=>x.textContent===q.o[q.a]).classList.add('ok');
-      $('.toast',host).innerHTML=(ok?'<span class="good">✔ إجابة صحيحة. </span>':'<span class="bad">✘ ليست صحيحة. </span>')+q.e;
-      $('#nx',host).innerHTML=`<button class="btn sm" style="margin-top:8px">${i+1<qd.length?'التالي ←':'عرض النتيجة'}</button>`;
-      $('#nx button',host).onclick=()=>{i++;show()};
+      picked=k;
+      $$('button',ob).forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      if(!$('#nx button',host)){
+        $('#nx',host).innerHTML=`<button class="btn sm" style="margin-top:8px">${i+1<qd.length?'التالي ←':'عرض النتيجة'}</button>`;
+        $('#nx button',host).onclick=()=>{ if(picked===q.a) sc++; i++; show(); };
+      }
     };ob.appendChild(b)});
   }
   show();
